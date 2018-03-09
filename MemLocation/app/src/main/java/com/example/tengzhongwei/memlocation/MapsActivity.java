@@ -3,6 +3,7 @@ package com.example.tengzhongwei.memlocation;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +69,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+               // mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
             }
 
             @Override
@@ -166,6 +168,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MainActivity.savedLocation.add(latLng);
         MainActivity.savedAddresses.add(address);
         MainActivity.arrayAdapter.notifyDataSetChanged();
+        SharedPreferences sharedPreferences = this.getSharedPreferences("com.example.tengzhongwei.memlocation",Context.MODE_PRIVATE);
+        try {
+            sharedPreferences.edit().putString("address", ObjectSerializer.serialize(MainActivity.savedAddresses)).apply();
+
+            ArrayList<String> lat = new ArrayList<>();
+            ArrayList<String> lng = new ArrayList<>();
+            for(LatLng latLng1L: MainActivity.savedLocation){
+                lat.add(String.valueOf(latLng1L.latitude));
+                lng.add(String.valueOf(latLng1L.longitude));
+            }
+
+            sharedPreferences.edit().putString("lat", ObjectSerializer.serialize(lat)).apply();
+            sharedPreferences.edit().putString("lng", ObjectSerializer.serialize(lng)).apply();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Toast.makeText(this, "Add Address Succeessfully", Toast.LENGTH_LONG).show();
     }
 }
